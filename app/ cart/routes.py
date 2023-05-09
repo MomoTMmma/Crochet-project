@@ -1,58 +1,36 @@
-from flask import Blueprint, request
-from ..models import Product
+from flask import Blueprint, render_template, url_for, redirect, flash
+from flask_login import current_user
+from app.models import Product
 
-api = Blueprint('api', __name__, url_prefix='/api')
+cart = Blueprint('cart', __name__, template_folder='cart_templates')
 
-@api.get('/product')
-def getProduct():
-    product = Product.query.all()
-    productlist = [p.to_dict() for p in product]
-    print(product)
-    return{
-        'status' : 'ok',
-        'data' : productlist
-    }
+# @cart.route('/my-cart')
+# def viewMyCart():
+#     products = my_cart.query.order_by(Product.product_id).all()
+#     return render_template('my_cart.html', products=products)
 
-@api.get('/product/<int:product_id>')
-def getSingleProduct(product_id):
-    p = Product.query.get(product_id)
-    if p:
-        product = p.to_dict()
-        return {
-            'status' : 'ok',
-            'data' : product
-        }
-    return {
-        'status' : 'NOT ok',
-        'message' : 'That product is not available!'
-    }
+@cart.route('/add/<int:product_id>')
+def addToCart(product_id):
+    product = Product.query.filter_by(product_id=product_id).first()
+    product.saveToCart(current_user)
+    product_name=product.title
+    flash(f"{product_name} has been added!")
+    return redirect(url_for('homePage'))
 
-@api.post('/createprduct')
-def createProductAPI():
-    data = request.json
+@cart.route('/remove/<int:product_id>')
+def removeFromCart(product_id):
+    product = cart.query.filter_by(product_id=product_id).first()
+    product.deleteFromCart(current_user)
+    product_name=product.title
+    flash(f"{product_name} has been Removed!")
+    return redirect(url_for('homePage'))
 
-    title = data['title']
-    price = data['price']
-    description = data['description']
-    category = data['category']
-    img_url = data['img_url']
+@cart.route('/view-singe-item/<int:product_id>')
+def viewSingleProduct(product_id):
+    product = Product.query.get(product_id)
+    return render_template('single_product.html',product=product)
 
-    new = Product(title, price, description, category, img_url)
-    new.saveProduct()
-    return {
-        'status' : 'ok',
-        'message' : 'New product has been created!'
-    }
-
-@api.get('/product/item/<int:user_id>')
-def getPostsByUser(user_id):
-    product = Product.query.filter(Product.user_id == user_id).all()
-    if product:
-        return {
-            'status' : 'ok',
-            'product' : [p.to_dict() for p in product]
-        }
-    return {
-        'status' : 'NOT ok',
-        'message' : 'No product available to return from the ID'
-    }
+@cart.route('/view-all-products')
+def viewAllProducts():
+    products = Product.query.order_by(Product.product_id).all()
+    return render_template('all_products.html', products=products)
