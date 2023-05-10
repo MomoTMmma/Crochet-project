@@ -1,16 +1,42 @@
-from flask import Blueprint, request
-from ..models import Product
+from flask import Blueprint, request, jsonify
+from ..models import Product, Cart
+from .services import get_Product
+from flask_cors import cross_origin
 
 api = Blueprint('api', __name__, url_prefix='/api')
 
-@api.get('/product')
+
+
+@api.post('/products')
+def add_product():
+    new_product = request.get_json()
+    product = [] # define and initialize the list
+    new_product_id = len(product) + 1
+    new_product['product_id'] = new_product_id
+    product.append(new_product)
+
+    return jsonify({'product': new_product}), 201
+
+@api.get('/products')
+@cross_origin()
+def all_Products():
+    products = Product.query.all()
+    response = []
+    for p in products:
+        response.append(p.to_dict())
+    return {'data' : response}
+
+
+@api.get('/product12345')
 def getProduct():
-    product = Product.query.all()
-    productlist = [p.to_dict() for p in product]
+    product = get_Product()
+    for p in product['product']:
+        new_p = Product(p['product_id'], p['title'], p['price'], p['description'], p['category'])
+        new_p.saveProduct()
     print(product)
     return{
         'status' : 'ok',
-        'data' : productlist
+        'data' : product
     }
 
 @api.get('/product/<int:product_id>')

@@ -1,20 +1,30 @@
-import requests
-import time
+from flask import jsonify
 
-def get_products(products):
-    response = requests.get()
-    if response.ok:
-        data = response.json()
-        product = {
-        'product_id' : data["id"],
-        'product_name' : data["title"],
-        'price' : data["price"],
-        'description' : data["description"],
-        'category': data["category"],
-        'product_image' : data["image"]
+def get_Product():
+    product = [
+        {
+            'product_id' : 1,
+            'title' : 'Flower bag',
+            'price' : 24.99,
+            'description' : 'Hand crochet purse with a hand sewn in cotton lining',
+            'category' : 'bags',
+        },
+        {
+            'product_id' : 2,
+            'title' : 'Steering Wheel Cover',
+            'price' : 15.99,
+            'description' : 'Blue with white daisys. Made with 100 percent acrylic yarn. Great for protecting your steering wheel from the sun!',
+            'category' : 'accessories'
+        },
+        {
+            'product_id' : 3,
+            'title' : 'Steering Wheel Cover',
+            'price' : 15.99,
+            'description' : 'Red with sunflowers. Made with 100 percent acrylic yarn. Great for protecting your steering wheel from the sun!',
+            'category' : 'accessories'
         }
-        return product
-    else:
-        return None
+    ]
 
-print(get_products(1))
+    return ({'product': product})
+
+

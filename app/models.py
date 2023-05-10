@@ -3,11 +3,12 @@ from flask_login import UserMixin
 from werkzeug.security import generate_password_hash
 db = SQLAlchemy()
 
-cart = db.Table(
-    'my_cart',
+Cart = db.Table(
+    'cart',
     db.Column('user_id', db.Integer, db.ForeignKey('user.id'), nullable=False),
-    db.Column('prduct_id', db.Integer, db.ForeignKey('product.id'), nullable=False)
+    db.Column('product_id', db.Integer, db.ForeignKey('product.id'), nullable=False)
 )
+
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -32,14 +33,14 @@ class Product(db.Model):
     price = db.Column(db.Numeric(10,2))
     description = db.Column(db.String)
     category = db.Column(db.String)
-    img_url = db.Column(db.String)
+    img_url = db.Column(db.String, default='')
     carted = db.relationship('User',
-        secondary = 'my_cart',
+        secondary = 'cart',
         backref = 'carted',
         lazy = 'dynamic'
     )
 
-    def __init__(self, product_id, title, price, description, category, img_url):
+    def __init__(self, product_id, title, price, description, category, img_url=''):
         self.product_id = product_id
         self.title = title
         self.price = price

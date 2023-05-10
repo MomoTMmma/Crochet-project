@@ -1,13 +1,13 @@
 from flask import Blueprint, render_template, url_for, redirect, flash
 from flask_login import current_user
-from app.models import Product
+from ..models import Product, Cart
 
 cart = Blueprint('cart', __name__, template_folder='cart_templates')
 
-# @cart.route('/my-cart')
-# def viewMyCart():
-#     products = my_cart.query.order_by(Product.product_id).all()
-#     return render_template('my_cart.html', products=products)
+@cart.route('/my-cart')
+def viewMyCart():
+    products = Cart.query.order_by(Product.product_id).all()
+    return render_template('my_cart.html', products=products)
 
 @cart.route('/add/<int:product_id>')
 def addToCart(product_id):
@@ -19,7 +19,7 @@ def addToCart(product_id):
 
 @cart.route('/remove/<int:product_id>')
 def removeFromCart(product_id):
-    product = cart.query.filter_by(product_id=product_id).first()
+    product = Cart.query.filter_by(product_id=product_id).first()
     product.deleteFromCart(current_user)
     product_name=product.title
     flash(f"{product_name} has been Removed!")
@@ -34,3 +34,4 @@ def viewSingleProduct(product_id):
 def viewAllProducts():
     products = Product.query.order_by(Product.product_id).all()
     return render_template('all_products.html', products=products)
+
